@@ -259,7 +259,9 @@ class YtMusicService {
         return List.empty();
       }
 
-      Map<String, dynamic> results = {};
+      Map<String, dynamic> results = {
+        
+      };
 
       if ((res['contents'] as Map).containsKey('tabbedSearchResultsRenderer')) {
         final tabIndex =

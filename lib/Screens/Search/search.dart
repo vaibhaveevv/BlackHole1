@@ -482,6 +482,8 @@ class _SearchPageState extends State<SearchPage> {
                                                                 searchType !=
                                                                         'saavn'
                                                                     ? () {
+                                                                        print(
+                                                                            "amazing");
                                                                         Navigator
                                                                             .push(
                                                                           context,

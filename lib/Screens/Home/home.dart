@@ -46,7 +46,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:logging/logging.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
@@ -320,12 +320,12 @@ class _HomePageState extends State<HomePage> {
                     titlePadding: const EdgeInsets.only(bottom: 40.0),
                     centerTitle: true,
                     background: ShaderMask(
-                      shaderCallback: (rect) {
+                      shaderCallback: (Rect rect) {
                         return LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            Colors.black.withOpacity(0.8),
+                            Colors.black.withOpacity(1),
                             Colors.black.withOpacity(0.1),
                           ],
                         ).createShader(
@@ -337,7 +337,7 @@ class _HomePageState extends State<HomePage> {
                         fit: BoxFit.cover,
                         alignment: Alignment.topCenter,
                         image: AssetImage(
-                          Theme.of(context).brightness == Brightness.dark
+                          Theme.of(context).brightness == Brightness.light
                               ? 'assets/header-dark.jpg'
                               : 'assets/header.jpg',
                         ),
@@ -589,79 +589,100 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
               ),
-            Expanded(
-              child: PersistentTabView.custom(
-                context,
-                controller: _controller,
-                itemCount: sectionsToShow.length,
-                navBarHeight: 60 +
-                    (rotated ? 0 : 70) +
-                    (useDense ? 0 : 10) +
-                    (rotated && useDense ? 10 : 0),
-                // confineInSafeArea: false,
-                onItemTapped: onItemTapped,
-                routeAndNavigatorSettings:
-                    CustomWidgetRouteAndNavigatorSettings(
-                  routes: namedRoutes,
-                  onGenerateRoute: (RouteSettings settings) {
-                    if (settings.name == '/player') {
-                      return PageRouteBuilder(
-                        opaque: false,
-                        pageBuilder: (_, __, ___) => const PlayScreen(),
-                      );
+            InkWell(
+              onTap: () {
+                onItemTapped;
+              },
+              child: SizedBox(
+                width: rotated
+                    ? MediaQuery.of(context).size.width - 70
+                    : MediaQuery.of(context).size.width,
+                child: PersistentTabView.custom(
+                  context,
+                  controller: _controller,
+                  itemCount: sectionsToShow.length,
+                  navBarHeight: 80 +
+                      (rotated ? 0 : 70) +
+                      (useDense ? 0 : 10) +
+                      (rotated && useDense ? 10 : 0),
+                  // confineInSafeArea: false,
+                  // onItemTapped: onItemTapped,
+                  // routeAndNavigatorSettings:
+                  //     CustomWidgetRouteAndNavigatorSettings(
+                  //   routes: namedRoutes,
+                  //   onGenerateRoute: (RouteSettings settings) {
+                  //     if (settings.name == '/player') {
+                  //       return PageRouteBuilder(
+                  //         opaque: false,
+                  //         pageBuilder: (_, __, ___) => const PlayScreen(),
+                  //       );
+                  //     }
+                  //     return HandleRoute.handleRoute(settings.name);
+                  //   },
+                  // ),
+                  customWidget: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      miniplayer,
+                      if (!rotated)
+                        ValueListenableBuilder(
+                          valueListenable: _selectedIndex,
+                          builder: (
+                            BuildContext context,
+                            int indexValue,
+                            Widget? child,
+                          ) {
+                            return AnimatedContainer(
+                              duration: const Duration(milliseconds: 100),
+                              height: 60,
+                              child: CustomBottomNavBar(
+                                currentIndex: indexValue,
+                                backgroundColor: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Colors.black.withOpacity(0.9)
+                                    : Colors.white.withOpacity(0.9),
+                                onTap: (index) {
+                                  onItemTapped(index);
+                                },
+                                items: _navBarItems(context),
+                              ),
+                            );
+                          },
+                        ),
+                    ],
+                  ),
+                  screens: sectionsToShow.map<CustomNavBarScreen>((e) {
+                    switch (e) {
+                      case 'Home':
+                        return CustomNavBarScreen(
+                          screen: HomeScreen(),
+                        );
+                      case 'Top Charts':
+                        return CustomNavBarScreen(
+                            screen: TopCharts(pageController: _pageController));
+
+                      case 'YouTube':
+                        return CustomNavBarScreen(
+                          screen: YouTube(),
+                        );
+
+                      // return const YouTube();
+                      case 'Library':
+                        return CustomNavBarScreen(
+                          screen: LibraryPage(),
+                        );
+
+                      // return const LibraryPage();
+                      default:
+                        return CustomNavBarScreen(
+                            screen: NewSettingsPage(callback: callback));
+
+                      // return NewSettingsPage(callback: callback);
                     }
-                    return HandleRoute.handleRoute(settings.name);
-                  },
+                  }).toList(),
                 ),
-                customWidget: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    miniplayer,
-                    if (!rotated)
-                      ValueListenableBuilder(
-                        valueListenable: _selectedIndex,
-                        builder: (
-                          BuildContext context,
-                          int indexValue,
-                          Widget? child,
-                        ) {
-                          return AnimatedContainer(
-                            duration: const Duration(milliseconds: 100),
-                            height: 60,
-                            child: CustomBottomNavBar(
-                              currentIndex: indexValue,
-                              backgroundColor: Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? Colors.black.withOpacity(0.9)
-                                  : Colors.white.withOpacity(0.9),
-                              onTap: (index) {
-                                onItemTapped(index);
-                              },
-                              items: _navBarItems(context),
-                            ),
-                          );
-                        },
-                      ),
-                  ],
-                ),
-                screens: sectionsToShow.map((e) {
-                  switch (e) {
-                    case 'Home':
-                      return const HomeScreen();
-                    case 'Top Charts':
-                      return TopCharts(
-                        pageController: _pageController,
-                      );
-                    case 'YouTube':
-                      return const YouTube();
-                    case 'Library':
-                      return const LibraryPage();
-                    default:
-                      return NewSettingsPage(callback: callback);
-                  }
-                }).toList(),
               ),
-            ),
+            )
           ],
         ),
       ),

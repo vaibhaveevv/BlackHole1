@@ -53,15 +53,15 @@ Widget imageCard({
           if (localImage || imageUrl == '')
             Image(
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stacktrace) {
-                if (localErrorFunction != null) {
-                  localErrorFunction(error, stacktrace);
-                }
-                return Image(
-                  fit: BoxFit.cover,
-                  image: placeholderImage,
-                );
-              },
+              // errorBuilder: (context, error, stacktrace) {
+              //   if (localErrorFunction != null) {
+              //     localErrorFunction(error, stacktrace);
+              //   }
+              //   return Image(
+              //     fit: BoxFit.cover,
+              //     image: placeholderImage,
+              //   );
+              // },
               image: FileImage(
                 File(
                   imageUrl,
